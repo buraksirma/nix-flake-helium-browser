@@ -179,6 +179,9 @@ stdenv.mkDerivation {
   ];
 
   dontWrapQtApps = true;
+  # Wrapped in postFixup instead: the hooks' wrapProgram builds a binary wrapper,
+  # which would pass the ${NIXOS_OZONE_WL:+...} flag through literally.
+  dontWrapGApps = true;
 
   buildInputs = [
     glib
@@ -261,6 +264,10 @@ stdenv.mkDerivation {
       --set FONTCONFIG_FILE "${fontsConf}"
       ${lib.concatMapStringsSep "\n      " (f: "--add-flags \"${f}\"") flags}
     )
+  '';
+
+  postFixup = ''
+    wrapProgramShell $out/bin/helium "''${gappsWrapperArgs[@]}"
   '';
 
   meta = {
